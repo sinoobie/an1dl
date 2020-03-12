@@ -14,8 +14,6 @@ def search(query):
 			info['title'].append((f'{c}. {x.text}',x.find('a').get('href')))
 			c+=1
 		except: sys.exit('[!] Tidak dapat ditemukan')
-#		print(x.find('a').get('href'))
-#	print(info)
 	grep()
 
 def grep():
@@ -24,6 +22,9 @@ def grep():
 	for i in info['title']:
 		print(i[0])
 	pil=int(input('pilih_> '))
+	if pil <= 0:
+		print('index out of range')
+		return True
 	get=info['title'][pil-1][1]
 	print()
 	req2=requests.get(get)
@@ -48,15 +49,13 @@ def grep():
 					download(l[1],l[0])
 	else:
 		download(info['dl'][0][1],info['dl'][0][0])
-#	print(info)
 
 def download(url,judul):
 	print("#",re.findall(r'. (.*)',judul)[0])
 	req3=requests.get('https://an1.com'+url)
-#	print(req3.text)
 	rg=re.findall(r'href=(.*)><input',req3.text)
 	print(f'{rg}\n')
-	if "https://files.an1.net" in rg[0]:
+	if "files.an1.net" in rg[0]:
 		link=rg[0]
 	elif '.apk' in rg[0] or '.zip' in rg[0]:
 		link=rg[0]
@@ -66,14 +65,14 @@ def download(url,judul):
 		link=bs3.find('input',{'class':'jsDLink'})['value']
 	else:
 		bps=requests.get(rg[0]).url
-		nya=input(f"[Maaf] link download {re.findall(r'https://(.*)/',bps)} saat ini belum kami support\n[?] Apakah anda mau membuka link tersebut (y/n) ")
+		nya=input(f"[Maaf] link download {re.findall(r'https://(.*)/',bps)} saat ini belum kami support\n[?] Apakah anda ingin membuka link tersebut (y/n) ")
 		if nya.lower() == 'y':
 			click.launch(rg[0])
 		return True
 
 	#Downloading
 	file=re.findall(r'Download (.*)  ',judul)[0]
-	with open(f"result/{file}","wb") as save:
+	with open(f'result/{file.replace("/",",")}','wb') as save:
 		response=requests.get(link,stream=True)
 		total_length=response.headers.get('content-length')
 		if total_length is None:
@@ -92,7 +91,7 @@ def download(url,judul):
 				save.write(data)
 				done=int(30*dlw/total_length)
 				print(end=f"\r\033[97m[\033[92m{'>'*done}\033[91m{'='*(30-done)}\033[97m] \033[96m{ges+1}% ",flush=True)
-	print("[OK] file saved in result")
+	print("\n[OK] file saved in result")
 
 if __name__ == "__main__":
 	os.system('clear')
