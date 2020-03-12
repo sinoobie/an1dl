@@ -36,7 +36,7 @@ def grep():
 	if len(info['dl']) > 1:
 		for j in info['dl']:
 			print(j[0])
-		print('A: Download semua')
+		print('\nA: Download semua')
 		lih=input('pilih_> ')
 		print()
 		try:
@@ -55,24 +55,25 @@ def download(url,judul):
 	req3=requests.get('https://an1.com'+url)
 #	print(req3.text)
 	rg=re.findall(r'href=(.*)><input',req3.text)
+	print(f'{rg}\n')
 	if "https://files.an1.net" in rg[0]:
 		link=rg[0]
+	elif '.apk' in rg[0] or '.zip' in rg[0]:
+		link=rg[0]
+	elif "www.4sync.com" in rg[0]:
+		req4=requests.get(rg[0])
+		bs3=Bs(req4.text,'html.parser')
+		link=bs3.find('input',{'class':'jsDLink'})['value']
 	else:
 		bps=requests.get(rg[0]).url
-#		print(rg,bps)
-		if "www.4sync.com" in bps:
-			req4=requests.get(rg[0])
-			bs3=Bs(req4.text,'html.parser')
-			link=bs3.find('input',{'class':'jsDLink'})['value']
-		else:
-			nya=input(f"[Maaf] link download {re.findall(r'https://(.*)/',bps)} saat ini belum kami support\n[?] Apakah anda mau membuka link tersebut (y/n) ")
-			if nya.lower() == 'y':
-				click.launch(rg[0])
-			return True
+		nya=input(f"[Maaf] link download {re.findall(r'https://(.*)/',bps)} saat ini belum kami support\n[?] Apakah anda mau membuka link tersebut (y/n) ")
+		if nya.lower() == 'y':
+			click.launch(rg[0])
+		return True
 
 	#Downloading
 	file=re.findall(r'Download (.*)  ',judul)[0]
-	with open(f"result/{file[0]}","wb") as save:
+	with open(f"result/{file}","wb") as save:
 		response=requests.get(link,stream=True)
 		total_length=response.headers.get('content-length')
 		if total_length is None:
@@ -91,6 +92,7 @@ def download(url,judul):
 				save.write(data)
 				done=int(30*dlw/total_length)
 				print(end=f"\r\033[97m[\033[92m{'>'*done}\033[91m{'='*(30-done)}\033[97m] \033[96m{ges+1}% ",flush=True)
+	print("[OK] file saved in result")
 
 if __name__ == "__main__":
 	os.system('clear')
