@@ -111,7 +111,7 @@ def download(url,judul):
 				
 				ges=int(100*dlw/total_length)
 				dsiz=int(count*4096)
-				sped=int(dsiz/(1024*durasi))
+				sped=int((dsiz/1024) / durasi)
 				dlw+=len(data)
 				save.write(data)
 				done=int(15*dlw/total_length)
