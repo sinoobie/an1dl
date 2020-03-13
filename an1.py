@@ -54,7 +54,11 @@ def download(url,judul):
 	print("#",re.findall(r'. (.*)',judul)[0])
 	req3=requests.get('https://an1.com'+url)
 	rg=re.findall(r'href=(.*)><input',req3.text)
-	print(f'{rg}\n')
+	
+	if "bit.ly" in rg[0]:
+		rq=requests.get(rg[0]).url
+		rg=rq.split()
+	
 	if "files.an1.net" in rg[0]:
 		link=rg[0]
 	elif '.apk' in rg[0] or '.zip' in rg[0]:
@@ -63,12 +67,23 @@ def download(url,judul):
 		req4=requests.get(rg[0])
 		bs3=Bs(req4.text,'html.parser')
 		link=bs3.find('input',{'class':'jsDLink'})['value']
+	elif "racaty.com" in rg[0]:
+		ses=requests.Session()
+		reqs=ses.get(rg[0])
+		bss=Bs(reqs.text,'html.parser')
+		op=bss.find('input',{'name':'op'})['value']
+		id=bss.find('input',{'name':'id'})['value']
+		
+		rep=ses.post(rg[0],data={'op':op,'id':id})
+		bss2=Bs(rep.text,'html.parser')
+		link=bss2.find('div',{'id':'DIV_1'}).find('a')['href']
 	else:
 		bps=requests.get(rg[0]).url
 		nya=input(f"[Maaf] link download {re.findall(r'https://(.*)/',bps)} saat ini belum kami support\n[?] Apakah anda ingin membuka link tersebut (y/n) ")
 		if nya.lower() == 'y':
 			click.launch(rg[0])
 		return True
+	print(f"{rg}\n")
 
 	#Downloading
 	file=re.findall(r'Download (.*)  ',judul)[0]
