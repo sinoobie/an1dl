@@ -58,7 +58,7 @@ def download(url,judul):
 	rg=re.findall(r'href=(.*)><input',req3.text)
 	
 	if "bit.ly" in rg[0]:
-		rq=ses.get(rg[0]).url
+		rq=requests.get(rg[0]).url
 		rg=rq.split()
 	
 	if "files.an1.net" in rg[0]:
@@ -66,16 +66,16 @@ def download(url,judul):
 	elif '.apk' in rg[0] or '.zip' in rg[0]:
 		link=rg[0]
 	elif "www.4sync.com" in rg[0]:
-		req4=ses.get(rg[0])
+		req4=requests.get(rg[0])
 		bs3=Bs(req4.text,'html.parser')
 		link=bs3.find('input',{'class':'jsDLink'})['value']
 	elif "racaty.com" in rg[0]:
-		reqs=ses.get(rg[0])
+		reqs=requests.get(rg[0])
 		bss=Bs(reqs.text,'html.parser')
 		op=bss.find('input',{'name':'op'})['value']
 		id=bss.find('input',{'name':'id'})['value']
 		
-		rep=ses.post(rg[0],data={'op':op,'id':id})
+		rep=requests.post(rg[0],data={'op':op,'id':id})
 		bss2=Bs(rep.text,'html.parser')
 		link=bss2.find('div',{'id':'DIV_1'}).find('a')['href']
 	else:
@@ -89,11 +89,11 @@ def download(url,judul):
 
 	#Downloading
 	file=re.findall(r'Download (.*)  ',judul)[0]
+	count=1
+	response=requests.get(link,stream=True)
+	start=time.time()
+	total_length=response.headers.get('content-length')
 	with open(f'result/{file.replace("/",",")}','wb') as save:
-		count=1
-		response=requests.get(link,stream=True)
-		start=time.time()
-		total_length=response.headers.get('content-length')
 		if total_length is None:
 			print("\n[Warn] Download GAGAL")
 			tan=input("[?] anda ingin melanjutkannya ke website android-1.com (y/n) ")
@@ -104,20 +104,21 @@ def download(url,judul):
 		else:
 			dlw=0
 			total_length=int(total_length)
-			for data in response.iter_content(chunk_size=4096):
+			cusi=512
+			for data in response.iter_content(chunk_size=cusi):
 				durasi=time.time() - start
 				if durasi == 0:
 					durasi=0.1
 				
-				ges=int(100*dlw/total_length)
-				dsiz=int(count*4096)
+				ges=round((dlw/total_length)*100)
+				dsiz=int(count*cusi)
 				sped=int((dsiz/1024) / durasi)
 				dlw+=len(data)
 				save.write(data)
 				done=int(15*dlw/total_length)
-				print(end=f"\r\033[97m[\033[92m{'>'*done}\033[91m{'='*(15-done)}\033[97m] {ges+1}%, {round(dsiz/(1024*1024), 2)} MB, {sped} KB/s  ",flush=True)
+				print(end=f"\r\033[97m[\033[92m{'>'*done}\033[91m{'='*(15-done)}\033[97m] {ges}%, {round(dsiz/(1024*1024), 2)} MB, {sped} KB/s  ",flush=True)
 				count+=1
-	print("\n[OK] file saved in result")
+	print("\n[OK] file saved in result\n")
 
 if __name__ == "__main__":
 	os.system('clear')
