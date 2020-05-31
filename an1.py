@@ -69,7 +69,7 @@ def download(url,judul):
 		req4=requests.get(rg[0])
 		bs3=Bs(req4.text,'html.parser')
 		link=bs3.find('input',{'class':'jsDLink'})['value']
-	elif "racaty.com" in rg[0]:
+	elif "racaty.net" in rg[0]:
 		reqs=requests.get(rg[0])
 		bss=Bs(reqs.text,'html.parser')
 		op=bss.find('input',{'name':'op'})['value']
@@ -77,7 +77,7 @@ def download(url,judul):
 		
 		rep=requests.post(rg[0],data={'op':op,'id':id})
 		bss2=Bs(rep.text,'html.parser')
-		link=bss2.find('div',{'id':'DIV_1'}).find('a')['href']
+		link=bss2.find('a',{'id':'uniqueExpirylink'})['href']
 	else:
 		bps=ses.get(rg[0]).url
 		nya=input(f"[Maaf] link download {re.findall(r'https://(.*)/',bps)} saat ini belum kami support\n[?] Apakah anda ingin membuka link tersebut (y/n) ")
@@ -116,7 +116,7 @@ def download(url,judul):
 				dlw+=len(data)
 				save.write(data)
 				done=int(15*dlw/total_length)
-				print(end=f"\r\033[97m[\033[92m{'>'*done}\033[91m{'='*(15-done)}\033[97m] {ges}%, {round(dsiz/(1024*1024), 2)} MB, {sped} KB/s  ",flush=True)
+				print(end=f"\r\033[97m[\033[92m{'>'*done}\033[91m{'='*(15-done)}\033[97m] {ges}%, {sped} KB/s, {round(dsiz/(1024*1024), 2)} MB  ",flush=True)
 				count+=1
 	print("\n[OK] file saved in result\n")
 
